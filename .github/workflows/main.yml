@@ -3,16 +3,13 @@ name: Build CakeAuto Mod
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Set up Java 21
       uses: actions/setup-java@v4
@@ -20,11 +17,26 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+
+    - name: Create proper structure
+      run: |
+        mkdir -p src/main/java/com/cakeauto/client
+        mkdir -p src/main/java/com/cakeauto/mixin
+        mkdir -p src/main/resources/assets/cakeauto/lang
+        mv CakeAutoMod.java src/main/java/com/cakeauto/ 2>/dev/null || true
+        mv CakeCommand.java src/main/java/com/cakeauto/ 2>/dev/null || true
+        mv CakeAutoPackets.java src/main/java/com/cakeauto/ 2>/dev/null || true
+        mv CakeAutoState.java src/main/java/com/cakeauto/ 2>/dev/null || true
+        mv CakeAutoClient.java src/main/java/com/cakeauto/client/ 2>/dev/null || true
+        mv CakeAutoScreen.java src/main/java/com/cakeauto/client/ 2>/dev/null || true
+        mv CraftingResultSlotMixin.java src/main/java/com/cakeauto/mixin/ 2>/dev/null || true
+        mv fabric.mod.json src/main/resources/ 2>/dev/null || true
+        mv cakeauto.mixins.json src/main/resources/ 2>/dev/null || true
 
     - name: Build with Gradle
-      run: ./gradlew build
+      run: gradle build
 
     - name: Upload mod JAR
       uses: actions/upload-artifact@v4
